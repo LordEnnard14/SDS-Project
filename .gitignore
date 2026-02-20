@@ -1,0 +1,11 @@
+# Archivo de configuración con claves secretas — NO subir
+config.js
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de editor
+.vscode/
+*.suo
+*.user

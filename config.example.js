@@ -1,0 +1,3 @@
+const CONFIG = {
+  HMAC_SECRET_KEY: 'TU_CLAVE_AQUI'
+};

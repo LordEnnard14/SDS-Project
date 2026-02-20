@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIDAS - AFP Habitat</title>
+  <link rel="stylesheet" href="midas_style.css">
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     VENTANA PRINCIPAL MIDAS
+════════════════════════════════════════════ -->
+<div class="window">
+
+  <!-- Titlebar -->
+  <div class="titlebar">
+    <div class="titlebar-left">
+      <div class="titlebar-icon">M</div>
+      MIDAS - Módulo de Inversiones y Tesorería
+    </div>
+    <div class="titlebar-btns">
+      <div class="tb-btn">_</div>
+      <div class="tb-btn">□</div>
+      <div class="tb-btn">✕</div>
+    </div>
+  </div>
+
+  <!-- Menubar -->
+  <div class="menubar">
+    <div class="menu-item">Archivo</div>
+    <div class="menu-item">Editar</div>
+    <div class="menu-item">Operaciones</div>
+    <div class="menu-item">Reportes</div>
+    <div class="menu-item">Ayuda</div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <span>📋</span> Nueva Liquidación de Inversión &nbsp;|&nbsp;
+    Usuario: <b>analista01</b> &nbsp;|&nbsp; Perfil: Analista Junior
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- PANEL 1: NEGOCIO / FONDO -->
+    <div class="panel">
+      <div class="panel-title">📁 Selección de Negocio</div>
+      <div class="form-row">
+        <label class="req">Negocio</label>
+        <input type="text" id="fondo-code" class="field-code" readonly placeholder="Código">
+        <button class="browse-btn" onclick="openFondoModal()" title="Buscar fondo">▶</button>
+        <input type="text" id="fondo-desc" class="field-desc readonly-auto" readonly placeholder="Seleccione un fondo...">
+      </div>
+    </div>
+
+    <!-- PANEL 2: DATOS DE OPERACIÓN -->
+    <div class="panel" id="panel-operacion">
+      <div class="panel-title">⚙ Datos de la Operación</div>
+
+      <div class="form-row">
+        <label class="req">Tipo de Operación</label>
+        <select id="tipo-op" class="field-md" onchange="onTipoOpChange()">
+          <option value="">-- Seleccione --</option>
+          <option value="COMPRA">Compra</option>
+          <option value="VENTA">Venta</option>
+          <option value="COMPRA_DIVISAS">Compra de Divisas</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Fecha de Liquidación</label>
+        <input type="date" id="fecha-liq" class="field-sm readonly-auto" readonly>
+      </div>
+
+      <div class="form-row">
+        <label class="req">Moneda</label>
+        <select id="moneda-code" class="field-sm" onchange="onMonedaChange()">
+          <option value="">--</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+        <input type="text" id="moneda-desc" class="field-md readonly-auto" readonly placeholder="Nombre moneda">
+      </div>
+
+      <div class="form-row">
+        <label>Tipo de Cambio (PEN)</label>
+        <input type="text" id="tipo-cambio" class="field-sm readonly-auto" readonly placeholder="0.000">
+        <span style="font-size:11px;color:#666;margin-left:4px;">Soles por unidad</span>
+      </div>
+
+      <div class="form-row">
+        <label class="req">Monto a Liquidar</label>
+        <input type="number" id="monto" class="field-md" placeholder="0.00" min="0" step="0.01" oninput="calcularSoles()">
+        <span id="monto-moneda" style="font-size:11px;color:#0a246a;font-weight:bold;margin-left:4px;"></span>
+      </div>
+
+      <div class="form-row">
+        <label>Equivalente en Soles</label>
+        <input type="text" id="monto-soles" class="field-md readonly-auto" readonly placeholder="0.00">
+        <span style="font-size:11px;color:#666;margin-left:4px;">PEN</span>
+      </div>
+    </div>
+
+    <!-- PANEL 3: FORMA DE PAGO -->
+    <div class="panel">
+      <div class="panel-title">💳 Forma de Pago</div>
+
+      <div class="form-row">
+        <label class="req">Forma de Pago</label>
+        <input type="text" id="pago-code" class="field-code readonly-auto" readonly placeholder="Código">
+        <select id="forma-pago" class="field-lg" onchange="onFormaPagoChange()">
+          <option value="">-- Seleccione --</option>
+          <option value="CHEQUE">Cheque</option>
+          <option value="CHEQUE_GER">Cheque Gerencia</option>
+          <option value="CXP">Cuenta por Pagar</option>
+          <option value="TRANS_BCR">Transferencia BCR</option>
+          <option value="TRANS_EXT">Transferencia Exterior</option>
+          <option value="TRANS_INT">Transferencia Interna</option>
+          <option value="TRANS_SB">Transferencia Sistema Bancos</option>
+        </select>
+      </div>
+
+      <!-- Solo visible al elegir Transferencia Interna -->
+      <div id="row-contraparte" class="form-row hidden">
+        <label class="req">Contraparte (Banco)</label>
+        <input type="text" id="contraparte-code" class="field-code" placeholder="Código" oninput="onContraparteInput()">
+        <button class="browse-btn" onclick="openContraparteModal()" title="Buscar banco">▶</button>
+        <input type="text" id="contraparte-desc" class="field-desc readonly-auto" readonly placeholder="Nombre del banco">
+      </div>
+    </div>
+
+    <!-- BOTÓN GENERAR -->
+    <button class="btn btn-generate" id="btn-generar" disabled onclick="openResumenModal()">
+      ⚡ GENERAR LIQUIDACIÓN
+    </button>
+
+  </div><!-- /content -->
+
+  <!-- Status bar -->
+  <div class="statusbar">
+    <div class="status-panel" id="status-msg">Listo</div>
+    <div class="status-panel">AFP Habitat</div>
+    <div class="status-panel" id="status-fecha"></div>
+  </div>
+
+</div><!-- /window -->
+
+
+<!-- MODAL: SELECCIONAR FONDO -->
+<div class="modal-overlay" id="fondo-overlay">
+  <div class="fondo-modal">
+    <div class="modal-titlebar">
+      <div class="titlebar-icon">M</div>
+      MIDAS – Seleccionar Negocio
+    </div>
+    <div style="padding:8px;">
+      <div style="font-size:11px;color:#555;margin-bottom:6px;">Seleccione el fondo a operar:</div>
+      <div class="fondo-list" id="fondo-list"></div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn btn-primary" onclick="confirmFondo()">Aceptar</button>
+      <button class="btn" onclick="closeFondoModal()">Cancelar</button>
+      <button class="btn">Ayuda</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL: SELECCIONAR CONTRAPARTE -->
+<div class="modal-overlay" id="contraparte-overlay">
+  <div class="fondo-modal" style="width:420px;">
+    <div class="modal-titlebar">
+      <div class="titlebar-icon">M</div>
+      MIDAS – Seleccionar Contraparte
+    </div>
+    <div style="padding:8px;">
+      <div style="font-size:11px;color:#555;margin-bottom:6px;">Bancos disponibles:</div>
+      <div class="fondo-list" id="banco-list"></div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn btn-primary" onclick="confirmBanco()">Aceptar</button>
+      <button class="btn" onclick="closeContraparteModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL: RESUMEN DE LIQUIDACIÓN -->
+<div class="modal-overlay" id="resumen-overlay">
+  <div class="modal">
+    <div class="modal-titlebar">
+      <div class="titlebar-icon">M</div>
+      MIDAS – Resumen de Liquidación
+    </div>
+    <div class="modal-content">
+      <div style="font-size:11px;color:#c00;font-weight:bold;">⚠ Verifique los datos antes de registrar.</div>
+
+      <div class="modal-section-title">Negocio / Fondo</div>
+      <div class="summary-row"><div class="s-label">Negocio:</div><div class="s-value" id="sum-fondo"></div></div>
+
+      <div class="modal-section-title">Operación</div>
+      <div class="summary-row"><div class="s-label">Tipo de Operación:</div><div class="s-value" id="sum-tipo"></div></div>
+      <div class="summary-row"><div class="s-label">Fecha de Liquidación:</div><div class="s-value" id="sum-fecha"></div></div>
+      <div class="summary-row"><div class="s-label">Moneda:</div><div class="s-value" id="sum-moneda"></div></div>
+      <div class="summary-row"><div class="s-label">Tipo de Cambio:</div><div class="s-value" id="sum-tc"></div></div>
+      <div class="summary-row"><div class="s-label">Monto a Liquidar:</div><div class="s-value" id="sum-monto" style="font-weight:bold;color:#0a246a;"></div></div>
+
+      <div class="modal-section-title">Pago</div>
+      <div class="summary-row"><div class="s-label">Forma de Pago:</div><div class="s-value" id="sum-pago"></div></div>
+      <div class="summary-row"><div class="s-label">Contraparte:</div><div class="s-value" id="sum-contraparte"></div></div>
+
+      <div class="modal-section-title">Integridad (SHA-256)</div>
+      <div style="font-size:11px;color:#555;margin-bottom:4px;">Hash del registro para verificación de integridad:</div>
+      <div class="hash-value" id="sum-hash">Calculando...</div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn btn-primary" onclick="registrarLiquidacion()">✅ Registrar Liquidación</button>
+      <button class="btn" onclick="closeResumenModal()">← Volver</button>
+      <button class="btn" onclick="closeResumenModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ALERT: CONFIRMACIÓN FINAL -->
+<div class="alert-overlay" id="confirm-overlay">
+  <div class="alert-box">
+    <div class="alert-titlebar">
+      <div class="titlebar-icon">M</div>
+      MIDAS – Liquidación Registrada
+    </div>
+    <div class="alert-body">
+      <div class="alert-icon">✅</div>
+      <div>La liquidación fue registrada exitosamente en el sistema.</div>
+      <div class="ref-number" id="confirm-ref"></div>
+      <div style="font-size:11px;color:#555;margin-top:6px;">
+        La operación ha sido enviada a aprobación del Supervisor de Tesorería<br>
+        conforme al control de segregación de funciones (ISO 27001 A.5.3).
+      </div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn btn-primary" onclick="closeConfirm()">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="midas_app.js"></script>
+</body>
+</html>
