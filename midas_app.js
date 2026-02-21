@@ -299,31 +299,28 @@ function resetForm() {
 }
 
 
-// ─── HMAC-SHA256 (Web Crypto API) ───
-// Clave secreta embebida en el sistema — no visible para el usuario
+// HMAC-SHA256 (Web Crypto API)
+// Clave secreta embebida en el sistema y que no sea visible para el usuario
 const HMAC_SECRET_KEY = CONFIG.HMAC_SECRET_KEY;
 
 
 async function hmacSha256(message) {
   const encoder  = new TextEncoder();
 
-  // 1. Importar la clave secreta al sistema criptográfico del navegador
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
     encoder.encode(HMAC_SECRET_KEY),
     { name: 'HMAC', hash: 'SHA-256' },
-    false,           // la clave no es exportable
-    ['sign']         // solo se puede usar para firmar
+    false,           
+    ['sign']       
   );
 
-  // 2. Firmar el mensaje (datos concatenados del formulario)
   const signature = await crypto.subtle.sign(
     'HMAC',
     cryptoKey,
     encoder.encode(message)
   );
 
-  // 3. Convertir el resultado a hexadecimal (64 caracteres)
   return Array.from(new Uint8Array(signature))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
